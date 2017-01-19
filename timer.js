@@ -178,10 +178,15 @@ var Timer = function(params){
 
 		if (compensate && setParams.lastEventTime){
 			var toAdd = new Date() - new Date(setParams.lastEventTime);
-			timer.time += timer.decreasing() ? -toAdd : toAdd;
-		}
 
-		if (setParams.running) timer.start();
+			if (setParams.running){
+				timer.time += timer.decreasing() ? -toAdd : toAdd;
+				timer.start();
+
+			} else {
+				timer.time += timer.decreasing() ? toAdd : -toAdd;
+			}
+		}
 	}
 
 	timer.display();
