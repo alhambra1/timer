@@ -183,6 +183,7 @@ var Timer = function(params){
 				timer.time += timer.decreasing() ? -toAdd : toAdd;
 				timer.start();
 			} else {
+				timer.lastEventTime = setParams.lastEventTime;
 				timer.display();
 			}
 		}
