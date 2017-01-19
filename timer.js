@@ -64,7 +64,7 @@ var Timer = function(params){
 
 	timer.startAt = params.startAt || 0;
 
-	timer.lastEventTime = null;
+	timer.lastEventTime = new Date().toGMTString();
 
 	timer.decreasing = function (){ return timer.startAt > 0 && timer.countDown; };
 
