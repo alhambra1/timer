@@ -182,9 +182,6 @@ var Timer = function(params){
 			if (setParams.running){
 				timer.time += timer.decreasing() ? -toAdd : toAdd;
 				timer.start();
-
-			} else {
-				timer.time += timer.decreasing() ? toAdd : -toAdd;
 			}
 		}
 	}
