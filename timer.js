@@ -24,7 +24,7 @@
 //			startAt<integer>,
 //			countDown<boolean>,
 //			running<boolean>,
-//			lastEventTime<GMTString>
+//			lastEventTime<UNIX Time Stamp>
 
 /* Example use
 
@@ -64,7 +64,7 @@ var Timer = function(params){
 
 	timer.startAt = params.startAt || 0;
 
-	timer.lastEventTime = new Date().toGMTString();
+	timer.lastEventTime = + new Date();
 
 	timer.decreasing = function (){ return timer.startAt > 0 && timer.countDown; };
 
@@ -146,7 +146,7 @@ var Timer = function(params){
 				timer.update();
 			}, timer.updateInterval);
 
-			timer.lastEventTime = new Date().toGMTString();
+			timer.lastEventTime = + new Date();
 			
 			timer.startCallback(timer);
 		}
@@ -154,7 +154,7 @@ var Timer = function(params){
 
 	timer.stop = function(){
 		if (timer.interval) clearInterval(timer.interval);
-		timer.lastEventTime = new Date().toGMTString();
+		timer.lastEventTime = + new Date();
 		timer.previousIntervals.push(timer.interval);
 		timer.interval = null;
 		timer.stopCallback(timer);
