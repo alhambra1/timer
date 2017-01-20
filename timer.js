@@ -8,9 +8,10 @@
 // Useful properties:
 //		.startAt<integer>,
 //		.countDown<boolean>, (this will count up to zero if startAt is negative)
-//		.countdownCallback<function(timer)>,
-//		.startCallback<function(timer)>, // will get called at countdown zero
+//		.countdownCallback<function(timer)>, // will get called at countdown zero
+//		.startCallback<function(timer)>, // will get called at start
 //		.stopCallback<function(timer)>, // will get called at stop and at countdown zero
+//		.resetCallback<function>(timer), // will get called on reset
 //		.formatTime<function(time, decreasing<boolean>),
 //		.displayFunction<function(formattedTime)>,
 //		.updateInterval<integer>, (milliseconds)
@@ -58,6 +59,8 @@ var Timer = function(params){
 	timer.startCallback = params.startCallback || function(timer){};
 	
 	timer.stopCallback = params.stopCallback || function(timer){};
+
+	timer.resetCallback = params.resetCallback || function(timer){};
 
 	timer.updateInterval = params.updateInterval || 10;
 
@@ -175,6 +178,7 @@ var Timer = function(params){
 		timer.time = timer.startAt;
 		if (!timer.running())
 			timer.display();
+		timer.resetCallback();
 	};
 
 	timer.stopAndReset = function(){
