@@ -17,14 +17,17 @@
 //		.time<integer>, (milliseconds)
 
 //		set() can be called any time and sets the timer to the new parameters.
-//		If the optional parameter, COMPENSATE, is set to 'true' the set() method
+//		If the optional property,'compensate', is set to 'true' the set() method
 //		will take into account the current time in relation to lastEventTime
 //		Parameters:
 //			time<integer>,
 //			startAt<integer>,
 //			countDown<boolean>,
 //			running<boolean>,
-//			lastEventTime<UNIX Time Stamp>
+//			lastEventTime<UNIX Time Stamp>,
+//			action<string>,
+//			delayAction<integer>,
+//			compensate<boolean>
 
 /* Example use
 
@@ -58,9 +61,9 @@ var Timer = function(params){
 
 	timer.updateInterval = params.updateInterval || 10;
 
-	timer.interval = null;
+	timer.timeout = null;
 
-	timer.previousIntervals = [];
+	timer.previousTimeouts = [];
 
 	timer.startAt = params.startAt || 0;
 
@@ -72,23 +75,29 @@ var Timer = function(params){
 		if (timer.decreasing() && !(timer.countDown && timer.time <= 0)){
 			timer.time -= timer.updateInterval;
 			timer.display();
+			timer.timeout = setTimeout(function(){
+				timer.update();
+			}, timer.updateInterval);
 
 		} else if (!timer.decreasing() && !(timer.countDown && timer.time >= 0)){
 			timer.time += timer.updateInterval;
 			timer.display();
+			timer.timeout = setTimeout(function(){
+				timer.update();
+			}, timer.updateInterval);
 
 		} else {
 			timer.stop();
-			timer.countdownCallback(timer);
 			timer.time = 0;
 			timer.display();
 			timer.time = timer.startAt;
+			timer.countdownCallback(timer);
 		}
 	}
 
 	timer.time = params.startAt || 0;
 	
-	// Default returns array [minus,hours,minutes,seconds]
+	// Default, returns array [minus,hours,minutes,seconds]
 	timer.formatTime = params.formatTime || function(time, decreasing){
 	  const steps = [null,3600000,60000,1000,10],
           bases = [null,24     ,60   ,60  ,100];
@@ -127,7 +136,7 @@ var Timer = function(params){
 			);
 	}
 
-	timer.running = function (){ return !!timer.interval; };
+	timer.running = function (){ return !!timer.timeout; };
 
 	timer.info = function(){
  		return {
@@ -142,7 +151,7 @@ var Timer = function(params){
 
 	timer.start = function(){
 		if (!timer.running()){
-			timer.interval = setInterval(function(){
+			timer.timeout = setTimeout(function(){
 				timer.update();
 			}, timer.updateInterval);
 
@@ -153,39 +162,50 @@ var Timer = function(params){
 	};
 
 	timer.stop = function(){
-		if (timer.interval) clearInterval(timer.interval);
-		timer.lastEventTime = + new Date();
-		timer.previousIntervals.push(timer.interval);
-		timer.interval = null;
-		timer.stopCallback(timer);
-	};
-
-	timer.reset = function(complete){
-		timer.time = timer.startAt;
-		if (complete){
-			timer.stop();
-			timer.lastEventTime = null;
+		if (timer.timeout) {
+			clearTimeout(timer.timeout);
+			timer.lastEventTime = + new Date();
+			timer.previousTimeouts.push(timer.timeout);
+			timer.timeout = null;
+			timer.stopCallback(timer);
 		}
-		timer.display();
 	};
 
-	timer.set = function(setParams, compensate = false){
-		timer.stop();
+	timer.reset = function(){
+		timer.time = timer.startAt;
+		if (!timer.running())
+			timer.display();
+	};
 
+	timer.stopAndReset = function(){
+		timer.stop();
+		timer.reset();
+	};
+
+	timer.set = function(setParams){
 		if (setParams.time !== undefined) timer.time = setParams.time;
 		if (setParams.startAt !== undefined) timer.startAt = setParams.startAt;
 		if (setParams.countDown !== undefined) timer.countDown = setParams.countDown;
+		setParams.delayAction = setParams.delayAction || 0;
 
-		if (compensate && setParams.lastEventTime){
-			var toAdd = new Date() - new Date(setParams.lastEventTime);
+		var toAdd;
 
-			if (setParams.running){
-				timer.time += timer.decreasing() ? -toAdd : toAdd;
-				timer.start();
+		if (setParams.delayAction && setParams.action && setParams.lastEventTime){
+			var delay = (setParams.lastEventTime + setParams.delayAction) - new Date();
+
+			if (delay < 0){
+				toAdd = -delay;
+
 			} else {
-				timer.lastEventTime = setParams.lastEventTime;
-				timer.display();
+				setTimeout(() => timer[setParams.action].call(), delay);
 			}
+		}
+
+		if (setParams.compensate && setParams.lastEventTime){
+			if (!toAdd)
+				toAdd = new Date() - new Date(setParams.lastEventTime);
+
+			timer.time += timer.decreasing() ? -toAdd : toAdd;
 		}
 	}
 
