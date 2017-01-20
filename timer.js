@@ -174,11 +174,12 @@ var Timer = function(params){
 		}
 	};
 
-	timer.reset = function(){
+	timer.reset = function(preventCallback){
 		timer.time = timer.startAt;
 		if (!timer.running())
 			timer.display();
-		timer.resetCallback();
+		if (!preventCallback)
+			timer.resetCallback();
 	};
 
 	timer.stopAndReset = function(){
@@ -187,7 +188,7 @@ var Timer = function(params){
 	};
 
 	timer.resetAndStart = function(){
-		timer.reset();
+		timer.reset(true);
 		timer.start();
 	};
 
@@ -205,8 +206,8 @@ var Timer = function(params){
 		
 			if (delay < 0)
 				toAdd = -delay;
-			else 
-				setTimeout(() => timer[setParams.action].call(), delay);
+			
+			setTimeout(() => timer[setParams.action].call(), delay);
 		}
 
 		if (setParams.compensate){
