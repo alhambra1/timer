@@ -207,7 +207,7 @@ var Timer = function(params){
 			if (delay < 0)
 				toAdd = -delay;
 			
-			setTimeout(() => timer[setParams.action].call(), delay);
+			setTimeout(() => timer[setParams.action].call(), Math.max(delay,0));
 		}
 
 		if (setParams.compensate){
