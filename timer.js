@@ -186,22 +186,21 @@ var Timer = function(params){
 		if (setParams.time !== undefined) timer.time = setParams.time;
 		if (setParams.startAt !== undefined) timer.startAt = setParams.startAt;
 		if (setParams.countDown !== undefined) timer.countDown = setParams.countDown;
+		setParams.lastEventTime = setParams.lastEventTime || +new Date();
 		setParams.delayAction = setParams.delayAction || 0;
 
 		var toAdd;
 
-		if (setParams.delayAction && setParams.action && setParams.lastEventTime){
+		if (setParams.action){
 			var delay = (setParams.lastEventTime + setParams.delayAction) - new Date();
-
-			if (delay < 0){
+		
+			if (delay < 0)
 				toAdd = -delay;
-
-			} else {
+			else 
 				setTimeout(() => timer[setParams.action].call(), delay);
-			}
 		}
 
-		if (setParams.compensate && setParams.lastEventTime){
+		if (setParams.compensate){
 			if (!toAdd)
 				toAdd = new Date() - new Date(setParams.lastEventTime);
 
