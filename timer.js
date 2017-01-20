@@ -66,8 +66,6 @@ var Timer = function(params){
 
 	timer.timeout = null;
 
-	timer.previousTimeouts = [];
-
 	timer.startAt = params.startAt || 0;
 
 	timer.lastEventTime = + new Date();
@@ -168,7 +166,6 @@ var Timer = function(params){
 		if (timer.timeout) {
 			clearTimeout(timer.timeout);
 			timer.lastEventTime = + new Date();
-			timer.previousTimeouts.push(timer.timeout);
 			timer.timeout = null;
 			timer.stopCallback(timer);
 		}
