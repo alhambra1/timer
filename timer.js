@@ -150,8 +150,11 @@ var Timer = function(params){
 		}
 	};
 
-	timer.start = function(){
+	timer.start = function(toAdd){
+		toAdd = toAdd || 0;
+
 		if (!timer.running()){
+			timer.time += toAdd;
 			timer.timeout = setTimeout(function(){
 				timer.update();
 			}, timer.updateInterval);
@@ -184,9 +187,9 @@ var Timer = function(params){
 		timer.reset();
 	};
 
-	timer.resetAndStart = function(){
+	timer.resetAndStart = function(toAdd){
 		timer.reset(true);
-		timer.start();
+		timer.start(toAdd);
 	};
 
 	timer.set = function(setParams){
@@ -196,7 +199,7 @@ var Timer = function(params){
 		setParams.lastEventTime = setParams.lastEventTime || +new Date();
 		setParams.delayAction = setParams.delayAction || 0;
 
-		var toAdd;
+		var toAdd = 0;
 
 		if (setParams.action){
 			var delay = (setParams.lastEventTime + setParams.delayAction) - new Date();
@@ -204,15 +207,16 @@ var Timer = function(params){
 			if (delay < 0)
 				toAdd = -delay;
 			
-			setTimeout(() => timer[setParams.action].call(), Math.max(delay,0));
+			if (setParams.compensate){
+				if (!toAdd)
+					toAdd = new Date() - new Date(setParams.lastEventTime);
+
+				toAdd = timer.decreasing() ? -toAdd : toAdd;
+			}
+
+			setTimeout(() => timer[setParams.action](toAdd), Math.max(delay,0));
 		}
 
-		if (setParams.compensate){
-			if (!toAdd)
-				toAdd = new Date() - new Date(setParams.lastEventTime);
-
-			timer.time += timer.decreasing() ? -toAdd : toAdd;
-		}
 	}
 
 	timer.display();
