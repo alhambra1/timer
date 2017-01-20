@@ -1,4 +1,4 @@
-/* Timer object */
+/* Timer object */ 
 // Written by Gilad Barkan January, 2017
 // Covered by the "Do whatever the heck you want with it" licence, 
 // the full text of which is: Do whatever the heck you want with it. 
