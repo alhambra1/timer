@@ -186,6 +186,11 @@ var Timer = function(params){
 		timer.reset();
 	};
 
+	timer.resetAndStart = function(){
+		timer.reset();
+		timer.start();
+	};
+
 	timer.set = function(setParams){
 		if (setParams.time !== undefined) timer.time = setParams.time;
 		if (setParams.startAt !== undefined) timer.startAt = setParams.startAt;
