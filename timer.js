@@ -64,7 +64,7 @@ var Timer = function(params){
 
 	timer.updateInterval = params.updateInterval || 10;
 
-	timer.timeout = null;
+	timer.interval = null;
 
 	timer.startAt = params.startAt || 0;
 
@@ -76,16 +76,20 @@ var Timer = function(params){
 		if (timer.decreasing() && !(timer.countDown && timer.time <= 0)){
 			timer.time -= timer.updateInterval;
 			timer.display();
-			timer.timeout = setTimeout(function(){
-				timer.update();
-			}, timer.updateInterval);
+// Recursive timeout seems to count less time passing than browser Date
+// and adding 1 ms on each recursive update gradually adds too much time to timer.
+// It seems that using interval is actually more accurate.
+// Note that the timer does not reflect accurate time if user goes to another browser tab.
+			//timer.timeout = setInterval(function(){
+			//	timer.update();
+			//}, timer.updateInterval);
 
 		} else if (!timer.decreasing() && !(timer.countDown && timer.time >= 0)){
 			timer.time += timer.updateInterval;
 			timer.display();
-			timer.timeout = setTimeout(function(){
-				timer.update();
-			}, timer.updateInterval);
+			//timer.timeout = setTimeout(function(){
+			//	timer.update();
+			//}, timer.updateInterval);
 
 		} else {
 			timer.stop();
@@ -137,7 +141,7 @@ var Timer = function(params){
 			);
 	}
 
-	timer.running = function (){ return !!timer.timeout; };
+	timer.running = function (){ return !!timer.interval; };
 
 	timer.info = function(){
  		return {
@@ -155,7 +159,7 @@ var Timer = function(params){
 
 		if (!timer.running()){
 			timer.time += toAdd;
-			timer.timeout = setTimeout(function(){
+			timer.interval = setInterval(function(){
 				timer.update();
 			}, timer.updateInterval);
 
@@ -166,10 +170,10 @@ var Timer = function(params){
 	};
 
 	timer.stop = function(){
-		if (timer.timeout) {
-			clearTimeout(timer.timeout);
+		if (timer.interval) {
+			clearInterval(timer.interval);
 			timer.lastEventTime = + new Date();
-			timer.timeout = null;
+			timer.interval = null;
 			timer.stopCallback(timer);
 		}
 	};
