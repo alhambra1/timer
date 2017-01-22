@@ -64,7 +64,9 @@ var Timer = function(params){
 
 	timer.updateInterval = params.updateInterval || 10;
 
-	timer.interval = null;
+	timer.timeout = null;
+
+	timer.lastTime = null;
 
 	timer.startAt = params.startAt || 0;
 
@@ -73,23 +75,14 @@ var Timer = function(params){
 	timer.decreasing = function (){ return timer.startAt > 0 && timer.countDown; };
 
 	timer.update = function(){
-		if (timer.decreasing() && !(timer.countDown && timer.time <= 0)){
-			timer.time -= timer.updateInterval;
+		if (!(timer.countDown && timer.time <= 0)){
+			var now = +new Date();
+			timer.time += timer.decreasing() ? -(now - timer.lastTime) : now - timer.lastTime;
+			timer.lastTime = now;
 			timer.display();
-// Recursive timeout seems to count less time passing than browser Date
-// and adding 1 ms on each recursive update gradually adds too much time to timer.
-// It seems that using interval is actually more accurate.
-// Note that the timer does not reflect accurate time if user goes to another browser tab.
-			//timer.timeout = setInterval(function(){
-			//	timer.update();
-			//}, timer.updateInterval);
-
-		} else if (!timer.decreasing() && !(timer.countDown && timer.time >= 0)){
-			timer.time += timer.updateInterval;
-			timer.display();
-			//timer.timeout = setTimeout(function(){
-			//	timer.update();
-			//}, timer.updateInterval);
+			timer.timeout = setTimeout(function(){
+				timer.update();
+			}, timer.updateInterval);
 
 		} else {
 			timer.stop();
@@ -141,7 +134,7 @@ var Timer = function(params){
 			);
 	}
 
-	timer.running = function (){ return !!timer.interval; };
+	timer.running = function (){ return !!timer.timeout; };
 
 	timer.info = function(){
  		return {
@@ -159,21 +152,22 @@ var Timer = function(params){
 
 		if (!timer.running()){
 			timer.time += toAdd;
-			timer.interval = setInterval(function(){
+			timer.lastTime = +new Date();
+			timer.timeout = setTimeout(function(){
 				timer.update();
 			}, timer.updateInterval);
 
-			timer.lastEventTime = + new Date();
+			timer.lastEventTime = timer.lastTime;
 			
 			timer.startCallback(timer);
 		}
 	};
 
 	timer.stop = function(){
-		if (timer.interval) {
-			clearInterval(timer.interval);
+		if (timer.timeout) {
+			clearTimeout(timer.timeout);
 			timer.lastEventTime = + new Date();
-			timer.interval = null;
+			timer.timeout = null;
 			timer.stopCallback(timer);
 		}
 	};
