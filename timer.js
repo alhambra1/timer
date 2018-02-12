@@ -147,9 +147,7 @@ var Timer = function(params){
 		}
 	};
 
-	timer.start = function(toAdd){
-		toAdd = toAdd || 0;
-
+	timer.start = function(toAdd=0){
 		if (!timer.running()){
 			timer.time += toAdd;
 			timer.lastTime = +new Date();
@@ -170,6 +168,7 @@ var Timer = function(params){
 			timer.timeout = null;
 			timer.stopCallback(timer);
 		}
+		timer.display();
 	};
 
 	timer.reset = function(preventCallback){
